@@ -17,12 +17,32 @@ class ProductController extends Controller
     {
         $this->product = $product;
     }
-
-    public function index()
+    /*
+        /api/products?fields=name,price&conditions=price:=:6.42;name:like:Toby%
+    */
+    public function index(Request $request)
     {
-        $products = $this->product->paginate(1);
+        $products = $this->product;
+        if($request->has('fields')){ //Verifica se o campo 'fields' tem alguma coisa
+            $fields = $request->get('fields');
+            $products = $products->selectRaw($fields);// Pegas os campos do 'fieldes' do banco
+        }
 
-        return new ProductCollection($products);
+        if($request->has('conditions')){
+            $conditions = explode(';',$request->get('conditions'));
+            
+            foreach($conditions as $c){
+                /*  
+                    $con[0] = campo do banco de dados
+                    $con[1] = operador
+                    $con[2] = valor a ser pesquisado no banco 
+                */
+                $cond = explode(':', $c);
+                $products = $products->where($cond[0],$cond[1], $cond[2]);
+            }
+        }
+        
+        return new ProductCollection($products->paginate(5));
         //return response()->json($products);
     }    
 
