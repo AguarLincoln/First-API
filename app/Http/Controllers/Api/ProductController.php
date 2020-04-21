@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductCollection;
 use App\Http\Resources\ProductResource;
 use App\Product;
+use App\Repository\ProductRepository;
 use Illuminate\Http\Request;
 use PHPUnit\Util\Json;
 
@@ -22,7 +23,9 @@ class ProductController extends Controller
     */
     public function index(Request $request)
     {
-        $products = $this->product;
+        $products = new ProductRepository($this->product);
+        /*
+        
         if($request->has('fields')){ //Verifica se o campo 'fields' tem alguma coisa
             $fields = $request->get('fields');
             $products = $products->selectRaw($fields);// Pegas os campos do 'fieldes' do banco
@@ -32,17 +35,23 @@ class ProductController extends Controller
             $conditions = explode(';',$request->get('conditions'));
             
             foreach($conditions as $c){
-                /*  
-                    $con[0] = campo do banco de dados
-                    $con[1] = operador
-                    $con[2] = valor a ser pesquisado no banco 
-                */
+                  
+                // $con[0] = campo do banco de dados
+                // $con[1] = operador
+                // $con[2] = valor a ser pesquisado no banco 
                 $cond = explode(':', $c);
                 $products = $products->where($cond[0],$cond[1], $cond[2]);
             }
         }
-        
-        return new ProductCollection($products->paginate(5));
+        */
+        if($request->has('conditions')){
+            $products->selectCondition($request->get('conditions'));
+        }
+
+        if($request->has('fields'))
+            $products->selectFilter($request->get('fields'));
+    
+        return new ProductCollection($products->results()->paginate(5));
         //return response()->json($products);
     }    
 
