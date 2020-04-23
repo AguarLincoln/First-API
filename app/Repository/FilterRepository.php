@@ -2,8 +2,8 @@
 namespace App\Repository;
 
 use Illuminate\Database\Eloquent\Model;
-
-abstract class FilterRepository
+use App\Repository\Contract\FilterRepositoryInterface;
+abstract class FilterRepository implements FilterRepositoryInterface
 {
     private $model;
 
